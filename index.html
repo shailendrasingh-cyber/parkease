@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="5" />
+    <title>Parking Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+        }
+        header img {
+            height: 50px;
+            margin-right: 10px;
+        }
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .vacant {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .occupied {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <img src="logo.png" alt="Logo"> <!-- Replace with the path to your logo -->
+            <h1>Parking Status</h1>
+        </div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="/video_feed">Live</a> <!-- Link to the Flask route for the live video feed -->
+        </nav>
+    </header>
+    <table id="parkingTable">
+        <thead>
+            <tr>
+                <th>Parking Area</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic content will be inserted here -->
+        </tbody>
+    </table>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCXBoNAFbX3JjRWg-1A79ajH8kYJBxCJ2s",
+            authDomain: "esp8266.firebaseapp.com",
+            databaseURL: "https://esp8266-42fe7-default-rtdb.firebaseio.com",
+            projectId: "esp8266",
+            storageBucket: "esp8266.appspot.com",
+            messagingSenderId: "1091702081490"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Reference to the database service
+        var database = firebase.database();
+
+        // Function to fetch and display parking status
+        function fetchParkingStatus() {
+            database.ref('parking_status').on('value', (snapshot) => {
+                const parkingData = snapshot.val();
+                const tableBody = document.getElementById('parkingTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                for (let area in parkingData) {
+                    let row = tableBody.insertRow();
+                    let cell1 = row.insertCell(0);
+                    let cell2 = row.insertCell(1);
+                    cell1.textContent = area;
+                    cell2.textContent = parkingData[area];
+
+                    // Add class based on status
+                    if (parkingData[area] === 'vacant') {
+                        cell2.classList.add('vacant');
+                    } else if (parkingData[area] === 'occupied') {
+                        cell2.classList.add('occupied');
+                    }
+                }
+            });
+        }
+
+        // Fetch parking status on load
+        window.onload = fetchParkingStatus;
+    </script>
+</body>
+</html>
